@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .upload-section, .query-section {
+            background-color: #f5f6f7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .response-container {
+            background-color: #f5f6f7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .query-form, .upload-form {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .query-form input[type="text"], .upload-form input[type="file"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .query-form button, .upload-form button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .query-form button:hover, .upload-form button:hover {
+            background-color: #45a049;
+        }
+
+        .response {
+            margin-top: 10px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Manual Chatbot</h1>
+        </div>
+
+        <div class="upload-section">
+            <h2>Upload Manual</h2>
+            <form id="upload-form" enctype="multipart/form-data" class="upload-form">
+                <input type="file" id="file" name="file" accept="application/pdf">
+                <button type="submit">Upload</button>
+            </form>
+            <div id="upload-response"></div>
+        </div>
+
+        <div class="query-section">
+            <h2>Ask a Question</h2>
+            <form id="query-form" class="query-form">
+                <input type="text" id="query" name="query" placeholder="Ask a question...">
+                <button type="submit">Submit</button>
+            </form>
+            <div class="response-container" id="response"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData();
+            const fileField = document.getElementById('file');
+            formData.append('file', fileField.files[0]);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('upload-response').innerText = data.message;
+            })
+            .catch(error => {
+                document.getElementById('upload-response').innerText = 'Error uploading manual.';
+            });
+        });
+
+        document.getElementById('query-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const query = document.getElementById('query').value;
+            fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responseContainer = document.getElementById('response');
+                const responseElement = document.createElement('div');
+                responseElement.classList.add('response');
+                responseElement.innerText = data.response;
+                responseContainer.appendChild(responseElement);
+            });
+        });
+    </script>
+</body>
+</html>
